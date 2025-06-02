@@ -14,7 +14,7 @@ const TopDoctors = () => {
         Simply browse through our extensive list of trusted doctors.
       </p>
       <div className=" w-full grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 pt-5 gap-y-6 px-3 sm:px-0">
-        {doctors.slice(0, 12).map((doctor, index) => (
+        {doctors.slice(0, 10).map((doctor, index) => (
           <DoctorCard key={index} doctor={doctor} />
         ))}
       </div>
