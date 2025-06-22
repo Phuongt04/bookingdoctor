@@ -5,7 +5,6 @@ import { assets } from "../assets/assets_frontend/assets";
 import RelatedDoctors from "../components/RelatedDoctors";
 
 const Appointment = () => {
-  // TODO: Implement appointment component here
   const { docId } = useParams();
   const { doctors, currencySymbol } = useContext(AppContext);
 
