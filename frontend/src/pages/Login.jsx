@@ -15,49 +15,55 @@ const Login = () => {
   };
 
   return (
-    <form className="min-h-[80vh] flex items-center ">
-      <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[390px] sm:min-w-100 border rounded-xl text-zinc-600 text-sm shadow-lg">
-        <p className="text-2xl font-semibold">
-          {state === "Sign Up" ? "Create Account" : "Login"}{" "}
-        </p>
-        <p>
-          Please {state === "Sign Up" ? "sign up" : "log in"} to book
-          appointment
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-100">
+      <form onSubmit={ontSubmitHandler} className="w-full max-w-md bg-white/90 rounded-3xl shadow-2xl p-10 flex flex-col gap-5 border border-blue-100">
+        <div className="text-center mb-2">
+          <p className="text-3xl font-bold text-blue-700 mb-1 tracking-wide drop-shadow-sm">
+            {state === "Sign Up" ? "Create Account" : "Login"}
+          </p>
+          <p className="text-gray-500 text-base">
+            Please {state === "Sign Up" ? "sign up" : "log in"} to book appointment
+          </p>
+        </div>
         {state === "Sign Up" && (
           <div className="w-full">
-            <p>Full Name</p>
+            <label className="block text-gray-700 mb-1">Full Name</label>
             <input
-              className="border border-zinc-300 rounded w-full p-2 mt-1"
+              className="border border-zinc-300 rounded-xl w-full p-3 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
               type="text"
               onChange={(e) => setName(e.target.value)}
               value={name}
+              placeholder="Enter your full name"
+              autoComplete="name"
             />
           </div>
         )}
-
         <div className="w-full">
-          <p>Email</p>
+          <label className="block text-gray-700 mb-1">Email</label>
           <input
-            className="border border-zinc-300 rounded w-full p-2 mt-1"
+            className="border border-zinc-300 rounded-xl w-full p-3 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
             type="email"
             onChange={(e) => setEmail(e.target.value)}
-            value={name}
+            value={email}
+            placeholder="Enter your email"
+            autoComplete="email"
           />
         </div>
         <div className="w-full">
-          <p>Password</p>
+          <label className="block text-gray-700 mb-1">Password</label>
           <input
-            className="border border-zinc-300 rounded w-full p-2 mt-1"
+            className="border border-zinc-300 rounded-xl w-full p-3 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
             type="password"
             onChange={(e) => setPassword(e.target.value)}
-            value={name}
+            value={password}
+            placeholder="Enter your password"
+            autoComplete={state === "Sign Up" ? "new-password" : "current-password"}
           />
         </div>
-        <button className="bg-[#5f6fff] text-white w-full py-2 rounded-2xl text-sm mt-4 hover:bg-[#5f6fff] transition duration-200 cursor-pointer">
+        <button type="submit" className="bg-gradient-to-r from-blue-500 to-purple-500 text-white w-full py-3 rounded-2xl text-base font-semibold mt-2 shadow-md hover:from-blue-600 hover:to-purple-600 transition duration-200 cursor-pointer">
           {state === "Sign Up" ? "Create Account" : "Login"}
         </button>
-        <p className="text-sm text-center mt-4">
+        <p className="text-sm text-center mt-2 text-gray-600">
           {state === "Sign Up"
             ? "Already have an account?"
             : "Don't have an account?"}{" "}
@@ -65,13 +71,13 @@ const Login = () => {
             onClick={() => {
               state === "Sign Up" ? setState("Login") : setState("Sign Up");
             }}
-            className="text-[#5f6fff] cursor-pointer"
+            className="text-blue-600 font-semibold cursor-pointer hover:underline"
           >
             {state === "Sign Up" ? "Login" : "Sign Up"}
           </span>
         </p>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 
