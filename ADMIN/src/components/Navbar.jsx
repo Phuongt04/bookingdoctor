@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { assets } from "../assets/assets_admin/assets.js";
+import { assets } from "../assets.js";
 import { Admincontext } from "../context/AdminContext";
 import { useNavigate } from "react-router-dom";
 

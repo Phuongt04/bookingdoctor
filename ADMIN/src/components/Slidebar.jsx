@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Admincontext } from "../context/AdminContext";
 import { NavLink } from "react-router-dom";
-import { assets } from "../assets/assets_admin/assets";
+import { assets } from "../assets.js";
 
 const Slidebar = () => {
   const { aToken, setAToken } = useContext(Admincontext);
