@@ -118,7 +118,15 @@ const aminLogin = async (req, res) => {
       error: error.message,
     });
   }
-
-
+  
 };
-export { aminLogin, addDoctors};
+const allDoctors = async (req, res) => {
+    try {
+        const doctors = await doctorModel.find({});
+        res.json({ success: true, doctors });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+export { aminLogin, addDoctors, allDoctors };

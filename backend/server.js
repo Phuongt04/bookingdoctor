@@ -46,7 +46,7 @@ app.use("/api/admin", adminRouter);
 app.use("/api/doctor", doctorRouter);
 // app.use("/api/chat", chatRouter); // Mở comment khi đã có file route
 // app.use("/api/user", userRouter); // Mở comment khi đã có file route
-
+app.use("/api/user", userRouter);
 // Health Check Endpoint (Để kiểm tra server sống hay chết)
 app.get("/", async (req, res) => {
   const healthCheck = {
