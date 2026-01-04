@@ -86,7 +86,7 @@ const addDoctors = async (req, res) => {
   }
 };
 
-const aminLogin = async (req, res) => {
+const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -129,4 +129,4 @@ const allDoctors = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 }
-export { aminLogin, addDoctors, allDoctors };
+export { adminLogin, addDoctors, allDoctors };

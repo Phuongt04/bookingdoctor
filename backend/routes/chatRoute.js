@@ -1,8 +1,11 @@
+// File: backend/routes/chatRoute.js
 import express from 'express';
-import { chatWithAI } from '../controllers/chatController.js';
+import { chatBot } from '../controllers/chatController.js';
 
 const chatRouter = express.Router();
 
-chatRouter.post('/', chatWithAI);
+// Định nghĩa đường dẫn gửi tin nhắn
+// API sẽ là: POST /api/chat/
+chatRouter.post('/', chatBot); 
 
 export default chatRouter;

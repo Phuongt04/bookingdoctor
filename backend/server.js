@@ -4,6 +4,7 @@ import "dotenv/config";
 import mongoose from "mongoose";
 import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
+import chatRouter from "./routes/chatRoute.js";
 
 // Import các Router
 import adminRouter from "./routes/adminRoute.js";
@@ -40,7 +41,9 @@ app.use((req, res, next) => {
   });
   next();
 });
-
+// Đổi từ: // app.use("/api/chat", chatRouter);
+// Thành:
+app.use("/api/chat", chatRouter);
 // API Endpoints
 app.use("/api/admin", adminRouter);
 app.use("/api/doctor", doctorRouter);

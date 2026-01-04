@@ -1,24 +1,38 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export const chatWithAI = async (req, res) => {
-  try {
-    const { question } = req.body;
-    // Dán trực tiếp cái mã AIza... của bạn vào trong ngoặc kép
-    const genAI = new GoogleGenerativeAI("AIzaSyDbEqSUd8FYQe1tGhfCuuF3SyElFn9nXSY");
-    // Thêm đuôi -001 vào
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+const chatBot = async (req, res) => {
+    try {
+        const { prompt } = req.body;
 
-    // Prompt Engineering: Dạy cho AI biết nó là ai
-    const prompt = `Bạn là trợ lý ảo của trang web đặt lịch khám bệnh DoctorBooking. 
-    Hãy trả lời ngắn gọn, thân thiện và hữu ích cho câu hỏi sau của khách hàng: ${question}`;
+        // Kiểm tra xem user có gửi câu hỏi không
+        if (!prompt) {
+            return res.json({ success: false, message: "Bạn chưa nhập câu hỏi!" });
+        }
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+        // 1. Khởi tạo Gemini với API Key
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        
+        // 2. Chọn model (gemini-pro là model xử lý văn bản tốt nhất hiện tại)
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    res.json({ success: true, message: text });
-  } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "AI đang bận, vui lòng thử lại sau!" });
-  }
-};
+        // 3. Gửi câu hỏi và chờ phản hồi
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        // 4. Trả kết quả về cho Frontend
+        res.json({ 
+            success: true, 
+            message: text 
+        });
+
+    } catch (error) {
+        console.log("Gemini Error:", error);
+        res.json({ 
+            success: false, 
+            message: "Bot đang bận hoặc lỗi kết nối. Vui lòng thử lại sau!" 
+        });
+    }
+}
+
+export { chatBot };
