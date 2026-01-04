@@ -31,7 +31,10 @@ const corsOptions = {
         'https://bookingdoctor-admin.vercel.app',
         'https://bookingdoctor-client.vercel.app',
         'https://bookingdoctor-jr16.vercel.app', // Thêm domain cụ thể của bạn nếu có
-        'https://bookingdoctor.vercel.app'
+        'https://bookingdoctor.vercel.app',
+        'https://bookingdoctorad.vercel.app',
+        'https://bookingdoctor-jr16-phuongt04s-projects.vercel.app'
+
       ]
     : [
         // Danh sách cho phép khi chạy dưới máy (Localhost)
