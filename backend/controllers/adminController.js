@@ -121,4 +121,4 @@ const aminLogin = async (req, res) => {
 
 
 };
-export { aminLogin, addDoctors,changeAvailability};
+export { aminLogin, addDoctors};
