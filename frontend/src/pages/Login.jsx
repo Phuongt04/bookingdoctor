@@ -22,7 +22,7 @@ const Login = () => {
             {state === "Sign Up" ? "Create Account" : "Login"}
           </p>
           <p className="text-gray-500 text-base">
-            Please {state === "Sign Up" ? "sign up" : "log in"} to book appointment
+            Please {state === "Sign Up" ? "Tạo tài khoản" : "Đăng nhập"} to Đặt lịch khám bệnh
           </p>
         </div>
         {state === "Sign Up" && (
@@ -33,7 +33,7 @@ const Login = () => {
               type="text"
               onChange={(e) => setName(e.target.value)}
               value={name}
-              placeholder="Enter your full name"
+              placeholder="Nhập họ và tên"
               autoComplete="name"
             />
           </div>
@@ -45,7 +45,7 @@ const Login = () => {
             type="email"
             onChange={(e) => setEmail(e.target.value)}
             value={email}
-            placeholder="Enter your email"
+            placeholder="Nhập email của bạn"
             autoComplete="email"
           />
         </div>
@@ -56,24 +56,24 @@ const Login = () => {
             type="password"
             onChange={(e) => setPassword(e.target.value)}
             value={password}
-            placeholder="Enter your password"
+            placeholder="Nhập mật khẩu của bạn"
             autoComplete={state === "Sign Up" ? "new-password" : "current-password"}
           />
         </div>
         <button type="submit" className="bg-gradient-to-r from-blue-500 to-purple-500 text-white w-full py-3 rounded-2xl text-base font-semibold mt-2 shadow-md hover:from-blue-600 hover:to-purple-600 transition duration-200 cursor-pointer">
-          {state === "Sign Up" ? "Create Account" : "Login"}
+          {state === "Sign Up" ? "Tạo tài khoản" : "Đăng nhập"}
         </button>
         <p className="text-sm text-center mt-2 text-gray-600">
           {state === "Sign Up"
-            ? "Already have an account?"
-            : "Don't have an account?"}{" "}
+            ? "Đã có tài khoản?"
+            : "Chưa có tài khoản?"}{" "}
           <span
             onClick={() => {
               state === "Sign Up" ? setState("Login") : setState("Sign Up");
             }}
             className="text-blue-600 font-semibold cursor-pointer hover:underline"
           >
-            {state === "Sign Up" ? "Login" : "Sign Up"}
+            {state === "Sign Up" ? "Đăng nhập" : "Tạo tài khoản"}
           </span>
         </p>
       </form>

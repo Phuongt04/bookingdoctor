@@ -28,15 +28,15 @@ const Contact = () => {
             <p>
               Email:{" "}
               <a
-                href="mailto:quangminh30@gmail.com"
+                href="mailto:hospital22DRTA1@gmail.com"
                 className="text-blue-600 underline"
               >
-                quangminh30@gmail.com
+                hospital22DRTA1@gmail.com
               </a>
             </p>
           </div>
           <h1 className="text-gray-800 text-2xl font-bold">
-            Careers at PRESCRIPTO
+            Careers at Docter
           </h1>
           <p>Learn more about our teams and job openings.</p>
 

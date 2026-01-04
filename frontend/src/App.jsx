@@ -10,6 +10,7 @@ import MyAppointment from "./pages/MyAppointment";
 import Appointment from "./pages/Appointment";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Chatbot from './components/Chatbot.jsx'; // Đã có import
 
 const App = () => {
   return (
@@ -27,6 +28,10 @@ const App = () => {
         <Route path="/appointment/:docId" element={<Appointment />} />
       </Routes>
       <Footer />
+      
+      {/* --- THÊM DÒNG NÀY VÀO ĐÂY --- */}
+      <Chatbot /> 
+      
     </div>
   );
 };

@@ -11,8 +11,7 @@ const Speciality = () => {
     >
       <h1 className=" text-3xl font-medium">Find by Speciality </h1>
       <p className="sm:w-1/3 text-center text-m">
-        Simply browse through our extensive list of trusted doctors, schedule
-        your appointment hassle-free.
+        Dễ dàng tìm kiếm theo chuyên khoa.
       </p>
       <div className=" flex sm:justify-center  gap-4 pt-5 w-full overflow-scroll  font-medium">
         {specialityData.map((item, index) => (

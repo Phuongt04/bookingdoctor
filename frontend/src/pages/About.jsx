@@ -15,15 +15,15 @@ const About = () => {
         />
         <div className="flex flex-col justify-center gap-6 md:w-2/4 text-base text-gray-700 bg-white/80 rounded-2xl shadow-lg p-8 border border-blue-100">
           <p className="text-lg font-medium text-gray-800">
-            Welcome to <span className="text-blue-600 font-bold">Prescripto</span>, your trusted partner in managing your healthcare needs conveniently and efficiently. At Prescripto, we understand the challenges individuals face when it comes to scheduling doctor appointments and managing their health records.
+            Chào mừng bạn đến với <span className="text-blue-600 font-bold">Prescripto</span>, đối tác đáng tin cậy của bạn trong việc quản lý nhu cầu chăm sóc sức khỏe một cách thuận tiện và hiệu quả. Tại Prescripto, chúng tôi hiểu rõ những thách thức mà cá nhân phải đối mặt khi lên lịch khám bác sĩ và quản lý hồ sơ sức khỏe của họ.
           </p>
           <p>
-            Prescripto is committed to excellence in healthcare technology. We continuously strive to enhance our platform, integrating the latest advancements to improve user experience and deliver superior service. Whether you're booking your first appointment or managing ongoing care, Prescripto is here to support you every step of the way.
+            Sứ mệnh của chúng tôi là đơn giản hóa quá trình này thông qua nền tảng trực tuyến thân thiện với người dùng, cho phép bạn dễ dàng đặt lịch hẹn với các chuyên gia y tế hàng đầu, truy cập hồ sơ sức khỏe cá nhân và nhận nhắc nhở quan trọng về các cuộc hẹn sắp tới. Với Prescripto, bạn có thể tập trung vào việc chăm sóc sức khỏe của mình trong khi chúng tôi lo liệu phần còn lại.
           </p>
           <div>
-            <b className="text-xl text-purple-700 block mb-2">Our Vision</b>
+            <b className="text-xl text-purple-700 block mb-2">Tầm nhìn của chúng tôi</b>
             <p>
-              Our vision at <span className="text-blue-600 font-semibold">Prescripto</span> is to create a seamless healthcare experience for every user. We aim to bridge the gap between patients and healthcare providers, making it easier for you to access the care you need, when you need it.
+              Tầm nhìn của chúng tôi tại <span className="text-blue-600 font-semibold">Prescripto</span> là tạo ra một trải nghiệm chăm sóc sức khỏe liền mạch cho mọi người dùng. Chúng tôi hướng đến việc tạo cầu nối giữa bệnh nhân và các nhà cung cấp dịch vụ chăm sóc sức khỏe, giúp bạn dễ dàng tiếp cận dịch vụ chăm sóc sức khỏe mà bạn cần, khi bạn cần nó.
             </p>
           </div>
         </div>

@@ -18,9 +18,9 @@ const RelatedDoctors = ({ docId, speciality }) => {
   }, [docId, speciality, doctors]);
   return (
     <div className=" flex flex-col items-center gap-4 my-16 text-gray-900 md:mx-10">
-      <h1 className=" text-3xl font-semibold">Top Doctors to Book</h1>
+      <h1 className=" text-3xl font-semibold">Bác sĩ hàng đầu</h1>
       <p className=" sm:w-1/2 text-center text-xl ">
-        Simply browse through our extensive list of trusted doctors.
+        Dể dàng tra cứu danh sách bác sĩ uy tín.
       </p>
       <div className=" w-full grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 pt-5 gap-y-6 px-3 sm:px-0">
         {relDoc.slice(0, 5).map((doctor, index) => (
@@ -34,7 +34,7 @@ const RelatedDoctors = ({ docId, speciality }) => {
           scrollTo(0, 0);
         }}
       >
-        more
+        XEM THÊM
       </button>
     </div>
   );

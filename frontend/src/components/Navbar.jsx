@@ -20,19 +20,19 @@ const Navbar = () => {
       />
       <ul className="hidden md:flex items-start gap-5 font-medium">
         <NavLink to="/">
-          <li className=" py-1 ">HOME</li>
+          <li className=" py-1 ">TRANG CHỦ</li>
           <hr className="border-none outline-none h-0.5 bg-[#5f6fff] w-3/5 m-auto hidden" />
         </NavLink>
         <NavLink to="/doctors">
-          <li className=" py-1 ">ALL DOCTOR</li>
+          <li className=" py-1 ">DANH SÁCH BÁC SĨ</li>
           <hr className="border-none outline-none h-0.5 bg-[#5f6fff] w-3/5 m-auto hidden" />
         </NavLink>
         <NavLink to="/about">
-          <li className=" py-1 ">ABOUT</li>
+          <li className=" py-1 ">GIỚI THIỆU</li>
           <hr className="border-none outline-none h-0.5 bg-[#5f6fff] w-3/5 m-auto hidden" />
         </NavLink>
         <NavLink to="/contact">
-          <li className=" py-1 ">CONTACT</li>
+          <li className=" py-1 ">LIÊN HỆ</li>
           <hr className="border-none outline-none h-0.5 bg-[#5f6fff] w-3/5 m-auto hidden" />
         </NavLink>
       </ul>
@@ -51,16 +51,16 @@ const Navbar = () => {
                   onClick={() => navigate("/my-profile")}
                   className="hover:text-black"
                 >
-                  My Profile
+                  HỒ SƠ CÁ NHÂN
                 </p>
                 <p
                   onClick={() => navigate("/my-appointments")}
                   className="hover:text-black"
                 >
-                  My Appointment
+                  LỊCH HẸN
                 </p>
                 <p onClick={() => setToken(false)} className="hover:text-black">
-                  Logout
+                  ĐĂNG XUẤT
                 </p>
               </div>
             </div>
@@ -70,7 +70,7 @@ const Navbar = () => {
             onClick={() => navigate("/login")}
             className=" bg-[#5f6fff] text-white px-8 py-3 rounded-3xl cursor-pointer font-light  hidden md:block   "
           >
-            Creat Account
+            ĐĂNG NHẬP
           </button>
         )}
       </div>

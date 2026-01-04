@@ -4,10 +4,11 @@ import "dotenv/config";
 import connectDB from "./config/mongobd.js";
 import connectCloudinary from "./config/cloudinary.js";
 import adminRouter from "./routes/adminRoute.js";
+import chatRouter from "./routes/chatRoute.js"; // 👈 QUAN TRỌNG 1: Import file route chat
 
 // app config
 const app = express();
-const port = process.env.PORT | 4000;
+const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 
@@ -17,6 +18,7 @@ app.use(cors());
 
 // api endpoints
 app.use("/api/admin", adminRouter);
+app.use("/api/chat", chatRouter); // 👈 QUAN TRỌNG 2: Đăng ký đường dẫn chat
 
 app.get("/", (req, res) => {
   res.send("API WORKING FINE 🙂");

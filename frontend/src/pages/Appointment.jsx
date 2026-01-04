@@ -99,7 +99,7 @@ const Appointment = () => {
             </div>
             <div>
               <p className="flex items-center gap-2 font-medium mt-3">
-                About <img src={assets.info_icon} alt="" />{" "}
+                Về chuyên gia <img src={assets.info_icon} alt="" />{" "}
               </p>
               <p className=" text-gray-600 max-w-[700px] mt-2">
                 {docInfo.about}
@@ -115,7 +115,7 @@ const Appointment = () => {
         </div>
         {/* booking slot */}
         <div className=" sm:ml-72 sm:pl-4 mt-4 font-medium text-gray-700 ">
-          <p>Booking slots</p>
+          <p>Đặt lịch khám bệnh</p>
           <div className=" flex gap-3 items-center w-full overflow-x-scroll mt-4">
             {docSlots.length &&
               docSlots.map((item, index) => (
@@ -156,7 +156,7 @@ const Appointment = () => {
               ))}
           </div>
           <button className=" text-sm  bg-[#5f6fff] text-white py-3 px-14 rounded-full my-6">
-            Book Appointment
+            Đặt lịch khám bệnh
           </button>
         </div>
 
