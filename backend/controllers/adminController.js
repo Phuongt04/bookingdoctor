@@ -16,7 +16,7 @@ const addDoctor = async (req, res) => {
       about,
       available,
       fees,
-      adress,
+      address,
       date,
       slots_booked,
     } = req.body;
@@ -33,7 +33,7 @@ const addDoctor = async (req, res) => {
       !degree ||
       !experience ||
       !fees ||
-      !adress
+      !address
     ) {
       return res.status(400).json({ message: "Missing data" });
     }
@@ -63,7 +63,7 @@ const addDoctor = async (req, res) => {
       about,
       available,
       fees,
-      adress: JSON.parse(adress),
+      address: JSON.parse(address),
       date: Date.now(),
       slots_booked,
       image: imageUrl, // Store the image URL
@@ -118,5 +118,14 @@ const aminLogin = async (req, res) => {
       error: error.message,
     });
   }
+  const allDoctors = async (req, res) => {
+      try {
+          const doctors = await doctorModel.find({})
+          res.json({ success: true, doctors })
+      } catch (error) {
+          console.log(error)
+          res.json({ success: false, message: error.message })
+      }
+  }
 };
-export { addDoctor, aminLogin };
+export { addDoctor, aminLogin, allDoctors };

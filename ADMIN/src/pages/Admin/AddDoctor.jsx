@@ -18,7 +18,7 @@ const AddDoctor = () => {
   const [address2, setAddress2] = useState("");
   const [about, setAbout] = useState("");
 
-  const { bakcendUrl, aToken } = useContext(Admincontext);
+  const { backendUrl, aToken } = useContext(Admincontext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,7 +41,7 @@ const AddDoctor = () => {
         JSON.stringify({ line1: address1, line2: address2 })
       );
       const { data } = await axios.post(
-        bakcendUrl + "api/admin/add-doctor",
+        backendUrl + "api/admin/add-doctor",
         formData,
         {
           headers: { aToken },
