@@ -1,25 +1,19 @@
 import express from 'express';
-import { 
-  doctorList, 
-  getDoctorById,
-  createDoctor,
-  updateDoctor,
-  deleteDoctor,
+import {  
+  doctorList,
   changeAvailability 
 } from '../controllers/doctorController.js';
 import { authAdmin } from '../middleware/authAdmin.js';
-import upload from '../middleware/multer.js';
 
-const router = express.Router();
+const doctorRouter = express.Router();
 
-// ✅ Public routes (không cần auth)
-router.get('/', doctorList);                 // GET /api/doctor - Lấy tất cả bác sĩ
-router.get('/:id', getDoctorById);           // GET /api/doctor/:id - Lấy chi tiết bác sĩ
+// 1. Lấy danh sách bác sĩ
+// Dùng đường dẫn /list cho rõ ràng (API sẽ là: GET /api/doctor/list)
+doctorRouter.get('/list', doctorList);                 
 
-// ✅ Protected admin routes (cần auth)
-router.post('/', authAdmin, upload.single('image'), createDoctor);        // Thêm bác sĩ
-router.put('/:id', authAdmin, upload.single('image'), updateDoctor);      // Cập nhật bác sĩ
-router.delete('/:id', authAdmin, deleteDoctor);                           // Xóa bác sĩ
-router.put('/availability/:id', authAdmin, changeAvailability);           // Thay đổi trạng thái
+// 2. Thay đổi trạng thái bác sĩ (Cần quyền Admin)
+// API sẽ là: POST /api/doctor/change-availability
+// (Lưu ý: Controller của bạn đang nhận `docId` từ body, nên dùng POST sẽ hợp lý hơn PUT :id)
+doctorRouter.post('/change-availability', authAdmin, changeAvailability);           
 
-export default router;
+export default doctorRouter;

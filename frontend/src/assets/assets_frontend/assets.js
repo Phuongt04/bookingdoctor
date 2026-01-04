@@ -297,4 +297,3 @@ export const doctors = [
         }
     },
 ]
-export { aminLogin, addDoctors, changeAvailability };
