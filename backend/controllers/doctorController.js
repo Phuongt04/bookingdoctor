@@ -1,108 +1,149 @@
-import doctorModel from "../models/doctorModel.js"
-import mongoose from "mongoose";
+import validator from "validator";
+import bcrypt from "bcrypt"; // Sửa tên biến cho chuẩn
+import { v2 as cloudinary } from "cloudinary";
+import doctorModel from "../models/doctorModel.js";
+import jwt from "jsonwebtoken";
+import fs from "fs"; // Import fs để xóa file tạm sau khi upload
 
-const doctorList = async (req, res) => {
+// API thêm bác sĩ
+const addDoctors = async (req, res) => {
   try {
-    console.log("=== DEBUG: doctorList called ===");
-    
-    // Kiểm tra kết nối database
-    const dbState = mongoose.connection.readyState;
-    console.log("MongoDB connection state:", dbState);
-    console.log("0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting");
-    
-    if (dbState !== 1) {
-      return res.status(503).json({ 
-        success: false, 
-        message: 'Database not connected',
-        connectionState: dbState 
-      });
+    const {
+      name,
+      email,
+      password,
+      speciality,
+      degree,
+      experience,
+      about,
+      available,
+      fees,
+      address,
+      slots_booked,
+    } = req.body;
+
+    const imageFile = req.file;
+
+    // 1. Kiểm tra dữ liệu đầu vào
+    if (!imageFile) {
+      return res.status(400).json({ success: false, message: "Image file is required" });
     }
-    
-    // Thử lấy tất cả collections để debug
-    const collections = await mongoose.connection.db.listCollections().toArray();
-    console.log("Available collections:", collections.map(c => c.name));
-    
-    // Kiểm tra xem collection doctors có tồn tại không
-    const hasDoctorsCollection = collections.some(c => c.name === 'doctors');
-    console.log("Has doctors collection:", hasDoctorsCollection);
-    
-    if (!hasDoctorsCollection) {
-      return res.json({ 
-        success: true, 
-        doctors: [],
-        message: 'Doctors collection does not exist yet' 
-      });
+
+    if (!name || !email || !password || !speciality || !degree || !experience || !fees || !address) {
+      // Xóa file ảnh đã upload tạm nếu thiếu dữ liệu khác
+      if(imageFile) fs.unlinkSync(imageFile.path); 
+      return res.status(400).json({ success: false, message: "Missing required data" });
     }
-    
-    // Lấy danh sách bác sĩ
-    console.log("Fetching doctors...");
-    const doctors = await doctorModel.find({}).select(['-password','-email']);
-    
-    console.log(`Found ${doctors.length} doctors`);
-    
-    if (doctors.length === 0) {
-      console.log("No doctors in database. Please add some doctors first.");
+
+    // 2. Validate Email & Password
+    if (!validator.isEmail(email)) {
+      if(imageFile) fs.unlinkSync(imageFile.path);
+      return res.json({ success: false, message: "Invalid email format" });
     }
+    if (password.length < 6) {
+      if(imageFile) fs.unlinkSync(imageFile.path);
+      return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" });
+    }
+
+    // 3. Hash Password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 4. Upload ảnh lên Cloudinary
+    const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+      resource_type: "image",
+    });
     
+    // Validate upload ảnh
+    if(!imageUpload || !imageUpload.secure_url) {
+        return res.status(500).json({ success: false, message: "Image upload failed" });
+    }
+
+    const imageUrl = imageUpload.secure_url;
+
+    // 5. Lưu vào Database
+    const doctorData = {
+      name,
+      email,
+      password: hashedPassword,
+      speciality,
+      degree,
+      experience,
+      about,
+      available, // Lưu ý: req.body gửi lên thường là string, có thể cần convert sang boolean nếu model yêu cầu
+      fees,
+      address: JSON.parse(address), // address gửi dạng string JSON
+      date: Date.now(),
+      slots_booked,
+      image: imageUrl,
+    };
+
+    const newDoctor = new doctorModel(doctorData);
+    await newDoctor.save();
+
+    // 6. Xóa file tạm trên server sau khi đã upload lên Cloudinary thành công
+    fs.unlinkSync(imageFile.path);
+
     res.json({
       success: true,
-      count: doctors.length,
-      doctors: doctors,
-      databaseInfo: {
-        connected: true,
-        collectionExists: hasDoctorsCollection,
-        totalDoctors: doctors.length
-      }
+      message: "Doctor added successfully",
+      doctor: newDoctor,
     });
-    
+
   } catch (error) {
-    console.error("Error in doctorList:", error);
-    console.error("Error stack:", error.stack);
-    
-    res.status(500).json({ 
+    // Xóa file ảnh nếu có lỗi xảy ra trong quá trình xử lý
+    if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+    }
+    console.error("Error adding doctor:", error);
+    res.status(500).json({
       success: false,
-      message: 'Server error fetching doctors',
+      message: "Internal server error",
       error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
-}
+};
 
-const changeAvailability = async (req, res) => {
+// API Admin Login
+const adminLogin = async (req, res) => {
   try {
-    const {docId} = req.body;
-    
-    if (!docId) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Doctor ID is required' 
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Email and password are required" });
+    }
+
+    // Kiểm tra thông tin Admin cứng trong file .env
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      // SỬA LỖI BẢO MẬT: Payload nên là object, không nối chuỗi password vào
+      const token = jwt.sign(
+        { email: email, role: 'admin' }, 
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' } // Nên set thời gian hết hạn cho token
+      );
+
+      res.json({
+        success: true,
+        message: "Admin login successful",
+        token: token,
+      });
+    } else {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
       });
     }
-    
-    const docData = await doctorModel.findById(docId);
-    
-    if (!docData) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Doctor not found' 
-      });
-    }
-    
-    await doctorModel.findByIdAndUpdate(docId, { available: !docData.available });
-    
-    res.json({ 
-      success: true, 
-      message: 'Availability Changed',
-      newStatus: !docData.available 
-    });
-    
   } catch (error) {
-    console.log("Error in changeAvailability:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    console.error("Error during admin login:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
     });
   }
-}
+};
 
-export { changeAvailability, doctorList };
+export { adminLogin, addDoctors };
