@@ -21,7 +21,7 @@ const Chatbot = () => {
     try {
       // 2. Gọi API xuống Backend (Backend sẽ gọi Gemini)
       // Lưu ý: Kiểm tra lại port 4000 xem có khớp với backend của bạn không
-      const { data } = await axios.post('http://localhost:4000/api/chat', { question: input });
+      const { data } = await axios.post('https://booking-backend-7f3v.onrender.com', { question: input });
 
       // 3. Hiện câu trả lời của AI
       const botMessage = { text: data.message, sender: "bot" };
