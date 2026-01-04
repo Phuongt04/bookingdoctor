@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
-import connectDB from "./config/mongobd.js"; // Lưu ý: Kiểm tra tên file là mongobd.js hay mongodb.js nhé
+import connectDB from "./config/mongodb.js"; // Lưu ý: Kiểm tra tên file là mongobd.js hay mongodb.js nhé
 import connectCloudinary from "./config/cloudinary.js";
 
 // Import các Router
