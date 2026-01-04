@@ -1,266 +1,108 @@
-import doctorModel from "../models/doctorModel.js";
-import bcrypt from "bcryptjs";
-import cloudinary from "../config/cloudinary.js";
+import doctorModel from "../models/doctorModel.js"
+import mongoose from "mongoose";
 
-// Lấy danh sách tất cả bác sĩ
 const doctorList = async (req, res) => {
   try {
-    console.log("Fetching doctors list...");
+    console.log("=== DEBUG: doctorList called ===");
     
-    // Tìm tất cả bác sĩ, ẩn password và email
-    const doctors = await doctorModel.find({})
-      .select(['-password', '-email', '-createdAt', '-updatedAt'])
-      .sort({ createdAt: -1 }); // Sắp xếp mới nhất trước
-      
+    // Kiểm tra kết nối database
+    const dbState = mongoose.connection.readyState;
+    console.log("MongoDB connection state:", dbState);
+    console.log("0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting");
+    
+    if (dbState !== 1) {
+      return res.status(503).json({ 
+        success: false, 
+        message: 'Database not connected',
+        connectionState: dbState 
+      });
+    }
+    
+    // Thử lấy tất cả collections để debug
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    console.log("Available collections:", collections.map(c => c.name));
+    
+    // Kiểm tra xem collection doctors có tồn tại không
+    const hasDoctorsCollection = collections.some(c => c.name === 'doctors');
+    console.log("Has doctors collection:", hasDoctorsCollection);
+    
+    if (!hasDoctorsCollection) {
+      return res.json({ 
+        success: true, 
+        doctors: [],
+        message: 'Doctors collection does not exist yet' 
+      });
+    }
+    
+    // Lấy danh sách bác sĩ
+    console.log("Fetching doctors...");
+    const doctors = await doctorModel.find({}).select(['-password','-email']);
+    
     console.log(`Found ${doctors.length} doctors`);
     
-    res.status(200).json({ 
-      success: true, 
+    if (doctors.length === 0) {
+      console.log("No doctors in database. Please add some doctors first.");
+    }
+    
+    res.json({
+      success: true,
       count: doctors.length,
-      data: doctors 
+      doctors: doctors,
+      databaseInfo: {
+        connected: true,
+        collectionExists: hasDoctorsCollection,
+        totalDoctors: doctors.length
+      }
     });
+    
   } catch (error) {
-    console.error("Error fetching doctors:", error);
+    console.error("Error in doctorList:", error);
+    console.error("Error stack:", error.stack);
+    
     res.status(500).json({ 
-      success: false, 
+      success: false,
       message: 'Server error fetching doctors',
-      error: error.message 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
-};
+}
 
-// Lấy chi tiết bác sĩ theo ID
-const getDoctorById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const doctor = await doctorModel.findById(id)
-      .select(['-password', '-email']);
-      
-    if (!doctor) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Doctor not found' 
-      });
-    }
-    
-    res.status(200).json({ 
-      success: true, 
-      data: doctor 
-    });
-  } catch (error) {
-    console.error("Error fetching doctor by ID:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error',
-      error: error.message 
-    });
-  }
-};
-
-// Thêm bác sĩ mới
-const createDoctor = async (req, res) => {
-  try {
-    const { 
-      name, 
-      email, 
-      password, 
-      specialization, 
-      experience, 
-      fees, 
-      degree,
-      available 
-    } = req.body;
-
-    // Kiểm tra required fields
-    if (!name || !email || !password || !specialization || !fees) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Please provide all required fields' 
-      });
-    }
-
-    // Kiểm tra email đã tồn tại chưa
-    const existingDoctor = await doctorModel.findOne({ email });
-    if (existingDoctor) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Doctor with this email already exists' 
-      });
-    }
-
-    // Upload ảnh lên Cloudinary nếu có
-    let imageUrl = '';
-    if (req.file) {
-      try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
-          folder: 'bookingdoctor/doctors',
-          transformation: [{ width: 500, height: 500, crop: 'limit' }]
-        });
-        imageUrl = result.secure_url;
-      } catch (uploadError) {
-        console.error("Cloudinary upload error:", uploadError);
-        return res.status(500).json({ 
-          success: false, 
-          message: 'Error uploading image' 
-        });
-      }
-    }
-
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Tạo bác sĩ mới
-    const newDoctor = new doctorModel({
-      name,
-      email,
-      password: hashedPassword,
-      specialization,
-      experience: experience || 0,
-      fees,
-      degree: degree || '',
-      available: available || true,
-      image: imageUrl
-    });
-
-    await newDoctor.save();
-
-    // Ẩn password khi trả về
-    newDoctor.password = undefined;
-
-    res.status(201).json({ 
-      success: true, 
-      message: 'Doctor created successfully',
-      data: newDoctor 
-    });
-  } catch (error) {
-    console.error("Error creating doctor:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error creating doctor',
-      error: error.message 
-    });
-  }
-};
-
-// Cập nhật bác sĩ
-const updateDoctor = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updateData = { ...req.body };
-
-    // Nếu có password mới, hash nó
-    if (updateData.password) {
-      const salt = await bcrypt.genSalt(10);
-      updateData.password = await bcrypt.hash(updateData.password, salt);
-    }
-
-    // Upload ảnh mới nếu có
-    if (req.file) {
-      try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
-          folder: 'bookingdoctor/doctors'
-        });
-        updateData.image = result.secure_url;
-      } catch (uploadError) {
-        console.error("Cloudinary upload error:", uploadError);
-      }
-    }
-
-    const updatedDoctor = await doctorModel.findByIdAndUpdate(
-      id, 
-      updateData, 
-      { new: true, runValidators: true }
-    ).select(['-password', '-email']);
-
-    if (!updatedDoctor) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Doctor not found' 
-      });
-    }
-
-    res.status(200).json({ 
-      success: true, 
-      message: 'Doctor updated successfully',
-      data: updatedDoctor 
-    });
-  } catch (error) {
-    console.error("Error updating doctor:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error updating doctor',
-      error: error.message 
-    });
-  }
-};
-
-// Xóa bác sĩ
-const deleteDoctor = async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const doctor = await doctorModel.findByIdAndDelete(id);
-    
-    if (!doctor) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Doctor not found' 
-      });
-    }
-
-    res.status(200).json({ 
-      success: true, 
-      message: 'Doctor deleted successfully' 
-    });
-  } catch (error) {
-    console.error("Error deleting doctor:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error deleting doctor',
-      error: error.message 
-    });
-  }
-};
-
-// Thay đổi trạng thái available
 const changeAvailability = async (req, res) => {
   try {
-    const { id } = req.params;
+    const {docId} = req.body;
     
-    const doctor = await doctorModel.findById(id);
+    if (!docId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Doctor ID is required' 
+      });
+    }
     
-    if (!doctor) {
+    const docData = await doctorModel.findById(docId);
+    
+    if (!docData) {
       return res.status(404).json({ 
         success: false, 
         message: 'Doctor not found' 
       });
     }
-
-    doctor.available = !doctor.available;
-    await doctor.save();
-
-    res.status(200).json({ 
+    
+    await doctorModel.findByIdAndUpdate(docId, { available: !docData.available });
+    
+    res.json({ 
       success: true, 
-      message: 'Availability changed',
-      available: doctor.available 
+      message: 'Availability Changed',
+      newStatus: !docData.available 
     });
+    
   } catch (error) {
-    console.error("Error changing availability:", error);
+    console.log("Error in changeAvailability:", error);
     res.status(500).json({ 
       success: false, 
-      message: 'Error changing availability',
-      error: error.message 
+      message: error.message 
     });
   }
-};
+}
 
-export { 
-  doctorList, 
-  getDoctorById, 
-  createDoctor, 
-  updateDoctor, 
-  deleteDoctor, 
-  changeAvailability 
-};
+export { changeAvailability, doctorList };
