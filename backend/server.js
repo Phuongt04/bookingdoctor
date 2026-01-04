@@ -1,17 +1,17 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
-import mongoose from "mongoose"; // Thêm import mongoose để kiểm tra connection
+import mongoose from "mongoose";
 import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
 
 // Import các Router
 import adminRouter from "./routes/adminRoute.js";
-import chatRouter from "./routes/chatRoute.js";
 import doctorRouter from "./routes/doctorRoute.js";
-import userRouter from "./routes/userRoute.js";
+// import chatRouter from "./routes/chatRoute.js"; // Tạm tắt nếu chưa có file này để tránh lỗi crash
+// import userRouter from "./routes/userRoute.js"; // Tạm tắt nếu chưa có file này
 
-// app config
+// App config
 const app = express();
 const port = process.env.PORT || 4000;
 
@@ -21,157 +21,97 @@ connectCloudinary();
 
 // MIDDLEWARES
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Thêm dòng này
+app.use(express.urlencoded({ extended: true }));
 
-// CORS Configuration
+// CORS Configuration (Cấu hình bảo mật)
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? [
+        // Danh sách các trang được phép gọi API khi đã deploy
         'https://bookingdoctor-admin.vercel.app',
         'https://bookingdoctor-client.vercel.app',
+        'https://bookingdoctor-jr16.vercel.app', // Thêm domain cụ thể của bạn nếu có
         'https://bookingdoctor.vercel.app'
       ]
-    : ['http://localhost:5173', 'http://localhost:5174'],
+    : [
+        // Danh sách cho phép khi chạy dưới máy (Localhost)
+        'http://localhost:5173', 
+        'http://localhost:5174',
+        'http://localhost:3000'
+      ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
+
 app.use(cors(corsOptions));
 
-// Middleware xử lý timeout
+// Middleware xử lý timeout cho Render (Tránh bị ngắt kết nối sớm)
 app.use((req, res, next) => {
-  // Set timeout 25s (Render timeout là 30s)
   req.setTimeout(25000, () => {
     if (!res.headersSent) {
-      res.status(408).json({ 
-        success: false, 
-        message: 'Request timeout' 
-      });
+      res.status(408).json({ success: false, message: 'Request timeout' });
     }
   });
-  
-  // Set response timeout
   res.setTimeout(25000, () => {
     if (!res.headersSent) {
-      res.status(504).json({ 
-        success: false, 
-        message: 'Gateway timeout' 
-      });
+      res.status(504).json({ success: false, message: 'Gateway timeout' });
     }
   });
-  
   next();
 });
 
-// api endpoints
+// API Endpoints
 app.use("/api/admin", adminRouter);
-app.use("/api/chat", chatRouter);
 app.use("/api/doctor", doctorRouter);
-app.use("/api/user", userRouter);
+// app.use("/api/chat", chatRouter); // Mở comment khi đã có file route
+// app.use("/api/user", userRouter); // Mở comment khi đã có file route
 
-// Health check endpoint
+// Health Check Endpoint (Để kiểm tra server sống hay chết)
 app.get("/", async (req, res) => {
-  try {
-    const healthCheck = {
-      status: "healthy",
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: process.env.NODE_ENV || 'development',
-      services: {
-        database: "unknown",
-        cloudinary: "unknown",
-        backend: "running"
-      }
-    };
-    
-    // Kiểm tra MongoDB connection
-    if (mongoose.connection.readyState === 1) {
-      healthCheck.services.database = "connected";
-      // Test query nhỏ
-      const count = await mongoose.connection.db.admin().ping();
-      healthCheck.services.database = count ? "healthy" : "warning";
-    } else if (mongoose.connection.readyState === 2) {
-      healthCheck.services.database = "connecting";
-    } else {
-      healthCheck.services.database = "disconnected";
-    }
-    
-    // Kiểm tra Cloudinary
-    healthCheck.services.cloudinary = process.env.CLOUDINARY_CLOUD_NAME 
-      ? "configured" 
-      : "not configured";
-    
-    // Trả về status code phù hợp
-    if (healthCheck.services.database === "connected" || healthCheck.services.database === "healthy") {
-      res.json(healthCheck);
-    } else {
-      res.status(503).json({
-        ...healthCheck,
-        status: "degraded",
-        message: "Some services are not available"
-      });
-    }
-    
-  } catch (error) {
-    console.error("Health check error:", error);
-    res.status(500).json({ 
-      status: "unhealthy",
-      error: "Health check failed",
-      timestamp: new Date().toISOString()
-    });
+  const healthCheck = {
+    status: "healthy",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    database: "disconnected"
+  };
+
+  if (mongoose.connection.readyState === 1) {
+    healthCheck.database = "connected";
+  } else if (mongoose.connection.readyState === 2) {
+    healthCheck.database = "connecting";
   }
+
+  res.json(healthCheck);
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.originalUrl} not found`
-  });
-});
-
-// Global error handler
+// Global Error Handler (Bắt lỗi toàn cục)
 app.use((err, req, res, next) => {
   console.error("Global error:", err);
-  
-  // Nếu là lỗi từ multer (upload file)
   if (err.code === 'LIMIT_FILE_SIZE') {
-    return res.status(400).json({
-      success: false,
-      message: 'File size too large. Maximum 5MB allowed.'
-    });
+    return res.status(400).json({ success: false, message: 'File size too large (Max 5MB)' });
   }
-  
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    message: err.message || 'Internal server error'
   });
 });
 
-// Xử lý shutdown graceful
+// Khởi động Server
+const server = app.listen(port, () => {
+  console.log(`✅ Server started on port ${port}`);
+  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// Xử lý khi tắt server (Graceful Shutdown)
 process.on('SIGTERM', () => {
   console.log('SIGTERM received. Closing HTTP server.');
   server.close(() => {
-    console.log('HTTP server closed.');
     mongoose.connection.close(false, () => {
-      console.log('MongoDB connection closed.');
       process.exit(0);
     });
   });
 });
-
-const server = app.listen(port, () => {
-  console.log(`Server started on port ${port}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`Database: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
-});
-
-// Keep-alive ping để tránh Render sleep
-if (process.env.NODE_ENV === 'production') {
-  setInterval(() => {
-    console.log('Keep-alive ping:', new Date().toISOString());
-  }, 600000); // 10 phút
-}
 
 export default app;
