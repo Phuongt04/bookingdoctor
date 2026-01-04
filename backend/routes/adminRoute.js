@@ -7,5 +7,5 @@ const adminRouter = express.Router();
 // Route to add a doctor
 adminRouter.post("/add-doctor", authAdmin, upload.single("image"), addDoctors);
 adminRouter.post("/login", aminLogin);
-adminRouter.post('/all-doctors', authAdmin, allDoctors) // Thêm dòng này
+adminRouter.post('/all-doctors', authAdmin, addDoctors) // Thêm dòng này
 export default adminRouter;
