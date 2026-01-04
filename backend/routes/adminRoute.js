@@ -1,7 +1,7 @@
 import express from "express";
 import { addDoctor, aminLogin } from "../controllers/adminController.js";
-import upload from "../middlewares/multer.js";
-import authAdmin from "../middlewares/authAdmin.js";
+import upload from "../middleware/multer.js";
+import authAdmin from "../middleware/authAdmin.js";
 
 const adminRouter = express.Router();
 // Route to add a doctor
