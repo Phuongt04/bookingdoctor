@@ -1,9 +1,25 @@
 import express from 'express';
-import { doctorList } from '../controllers/doctorController.js';
+import { 
+  doctorList, 
+  getDoctorById,
+  createDoctor,
+  updateDoctor,
+  deleteDoctor,
+  changeAvailability 
+} from '../controllers/doctorController.js';
+import { authAdmin } from '../middleware/authAdmin.js';
+import upload from '../middleware/multer.js';
 
-const doctorRouter = express.Router();
+const router = express.Router();
 
-// API lấy danh sách toàn bộ bác sĩ
-doctorRouter.get('/list', doctorList);
+// ✅ Public routes (không cần auth)
+router.get('/', doctorList);                 // GET /api/doctor - Lấy tất cả bác sĩ
+router.get('/:id', getDoctorById);           // GET /api/doctor/:id - Lấy chi tiết bác sĩ
 
-export default doctorRouter;
+// ✅ Protected admin routes (cần auth)
+router.post('/', authAdmin, upload.single('image'), createDoctor);        // Thêm bác sĩ
+router.put('/:id', authAdmin, upload.single('image'), updateDoctor);      // Cập nhật bác sĩ
+router.delete('/:id', authAdmin, deleteDoctor);                           // Xóa bác sĩ
+router.put('/availability/:id', authAdmin, changeAvailability);           // Thay đổi trạng thái
+
+export default router;
