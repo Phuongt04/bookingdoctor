@@ -23,32 +23,9 @@ connectCloudinary();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS Configuration (Cấu hình bảo mật)
-const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [
-        // Danh sách các trang được phép gọi API khi đã deploy
-        'https://bookingdoctor-admin.vercel.app',
-        'https://bookingdoctor-client.vercel.app',
-        'https://bookingdoctor-jr16.vercel.app', // Thêm domain cụ thể của bạn nếu có
-        'https://bookingdoctor.vercel.app',
-        'https://bookingdoctorad.vercel.app',
-        'https://bookingdoctor-jr16-phuongt04s-projects.vercel.app'
 
-      ]
-    : [
-        // Danh sách cho phép khi chạy dưới máy (Localhost)
-        'http://localhost:5173', 
-        'http://localhost:5174',
-        'http://localhost:3000'
-      ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-};
-
-app.use(cors(corsOptions));
-
+// Cho phép TẤT CẢ các trang web đều vào được (Dùng để fix lỗi nhanh)
+app.use(cors({ origin: true, credentials: true }));
 // Middleware xử lý timeout cho Render (Tránh bị ngắt kết nối sớm)
 app.use((req, res, next) => {
   req.setTimeout(25000, () => {

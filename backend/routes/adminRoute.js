@@ -1,11 +1,13 @@
 import express from "express";
-import {aminLogin, addDoctors } from "../controllers/adminController.js";
-import upload from "../middleware/multer.js";
-import {authAdmin} from "../middleware/authAdmin.js";
+import { addDoctors, adminLogin } from "../controllers/adminController.js"; // Đảm bảo đúng tên hàm
+import { authAdmin } from "../middleware/authAdmin.js";
+import upload from "../middleware/multer.js"; // <-- QUAN TRỌNG: Phải có dòng này
 
 const adminRouter = express.Router();
-// Route to add a doctor
+
+adminRouter.post("/login", adminLogin);
+
+// Dòng này BẮT BUỘC phải có 'upload.single("image")' thì mới gửi ảnh được
 adminRouter.post("/add-doctor", authAdmin, upload.single("image"), addDoctors);
-adminRouter.post("/login", aminLogin);
-adminRouter.post('/all-doctors', authAdmin, addDoctors) // Thêm dòng này
+
 export default adminRouter;
