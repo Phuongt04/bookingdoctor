@@ -111,29 +111,29 @@ const updateProfile = async (req, res) => {
 // API Đặt lịch
 const bookAppointment = async (req, res) => {
     try {
-        const { userId, docId, slotDate, slotTime } = req.body
-        const docData = await doctorModel.findById(docId).select('-password')
+        const { userId, docId, slotDate, slotTime } = req.body;
+
+        const docData = await doctorModel.findById(docId).select('-password');
 
         if (!docData.available) {
-            return res.json({ success: false, message: 'Bác sĩ không có sẵn' })
+            return res.json({ success: false, message: 'Doctor not available' });
         }
 
-        let slots_booked = docData.slots_booked
+        let slots_booked = docData.slots_booked;
 
-        // Kiểm tra slot có trống không
+        // Kiểm tra xem slot này đã bị đặt chưa
         if (slots_booked[slotDate]) {
             if (slots_booked[slotDate].includes(slotTime)) {
-                return res.json({ success: false, message: 'Khung giờ đã được đặt' })
-            } else {
-                slots_booked[slotDate].push(slotTime)
+                return res.json({ success: false, message: 'Slot not available' });
             }
         } else {
-            slots_booked[slotDate] = []
-            slots_booked[slotDate].push(slotTime)
+            slots_booked[slotDate] = [];
         }
 
-        const userData = await userModel.findById(userId).select('-password')
-        delete docData.slots_booked
+        slots_booked[slotDate].push(slotTime);
+
+        const userData = await userModel.findById(userId).select('-password');
+        delete docData.slots_booked;
 
         const appointmentData = {
             userId,
@@ -146,17 +146,17 @@ const bookAppointment = async (req, res) => {
             date: Date.now()
         }
 
-        const newAppointment = new appointmentModel(appointmentData)
-        await newAppointment.save()
+        const newAppointment = new appointmentModel(appointmentData);
+        await newAppointment.save();
 
-        // Lưu lại slot vào data bác sĩ
-        await doctorModel.findByIdAndUpdate(docId, { slots_booked })
+        // Lưu lại slot đã đặt vào data bác sĩ
+        await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
-        res.json({ success: true, message: 'Đặt lịch thành công' })
+        res.json({ success: true, message: 'Appointment Booked' });
 
     } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        console.log(error);
+        res.json({ success: false, message: error.message });
     }
 }
 

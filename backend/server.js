@@ -10,7 +10,7 @@ import chatRouter from "./routes/chatRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import doctorRouter from "./routes/doctorRoute.js";
 // import chatRouter from "./routes/chatRoute.js"; // Tạm tắt nếu chưa có file này để tránh lỗi crash
- import userRouter from "./routes/userRoute.js"; // Tạm tắt nếu chưa có file này
+import userRouter from "./routes/userRoute.js"; // Tạm tắt nếu chưa có file này
 
 // App config
 const app = express();

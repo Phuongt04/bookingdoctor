@@ -25,7 +25,7 @@ const TopDoctors = () => {
           scrollTo(0, 0);
         }}
       >
-        more
+        Xem thêm
       </button>
     </div>
   );
