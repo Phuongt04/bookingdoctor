@@ -12,7 +12,7 @@ import AddDoctor from "./pages/Admin/AddDoctor";
 import DoctorList from "./pages/Admin/DoctorList";
 
 function App() {
-  const { aToken } = useContext(Admincontext);
+  const { aToken } = useContext(AdminContext);
   return aToken ? (
     <div className="bg-[#F8F8F8] min-h-screen">
       <ToastContainer />

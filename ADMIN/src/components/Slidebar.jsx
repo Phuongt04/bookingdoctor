@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
-import { AdminContext } from "../context/AdminContext";
+import { AdminContext } from "../context/AdminContext"; // Đúng
 import { NavLink } from "react-router-dom";
 import { assets } from "../assets.js";
 
 const Slidebar = () => {
-  const { aToken, setAToken } = useContext(AdminContext);
+  const { aToken } = useContext(AdminContext);
   return (
     <div className="min-h-screen bg-white ">
       {aToken ? (
