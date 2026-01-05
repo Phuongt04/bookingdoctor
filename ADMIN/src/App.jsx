@@ -3,7 +3,7 @@ import React, { useContext } from "react";
 import { Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import { ToastContainer, toast } from "react-toastify";
-import { Admincontext } from "./context/AdminContext";
+import { AdminContext } from "./context/AdminContext";
 import Navbar from "./components/Navbar";
 import Slidebar from "./components/Slidebar";
 import Dashboard from "./pages/Admin/Dashboard";

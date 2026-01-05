@@ -1,10 +1,12 @@
 import React, { useContext } from "react";
 import { assets } from "../assets.js";
-import { Admincontext } from "../context/AdminContext";
+// Sai: import { Admincontext } from "../context/AdminContext";
+import { AdminContext } from "../context/AdminContext"; // Đúng
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-  const { aToken, setAToken } = useContext(Admincontext);
+  // Sai: const { aToken, setAToken } = useContext(Admincontext);
+  const { aToken, setAToken } = useContext(AdminContext); // Đúng
   const navigate = useNavigate();
   const logout = () => {
     navigate("/");
