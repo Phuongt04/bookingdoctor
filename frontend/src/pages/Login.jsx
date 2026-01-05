@@ -5,7 +5,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const ontSubmitHandler = async (e) => {
+  const onSubmitHandler = async (e) => {
     e.preventDefault();
     if (state === "Sign Up") {
       // Sign up logic
@@ -16,7 +16,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-100">
-      <form onSubmit={ontSubmitHandler} className="w-full max-w-md bg-white/90 rounded-3xl shadow-2xl p-10 flex flex-col gap-5 border border-blue-100">
+      <form onSubmit={onSubmitHandler} className="w-full max-w-md bg-white/90 rounded-3xl shadow-2xl p-10 flex flex-col gap-5 border border-blue-100">
         <div className="text-center mb-2">
           <p className="text-3xl font-bold text-blue-700 mb-1 tracking-wide drop-shadow-sm">
             {state === "Sign Up" ? "Create Account" : "Login"}

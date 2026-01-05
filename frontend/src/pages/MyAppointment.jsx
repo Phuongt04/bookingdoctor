@@ -1,54 +1,102 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const MyAppointment = () => {
-  const { doctors } = useContext(AppContext);
-  console.log(doctors);
+  // Lấy backendUrl và token từ Context để gọi API
+  const { backendUrl, token, getDoctorsData } = useContext(AppContext);
+  
+  // Tạo state để lưu danh sách lịch hẹn từ MongoDB
+  const [appointments, setAppointments] = useState([]);
+
+  // Hàm gọi API lấy lịch hẹn của User
+  const getUserAppointments = async () => {
+    try {
+      const { data } = await axios.get(backendUrl + "/api/user/appointments", {
+        headers: { token },
+      });
+
+      if (data.success) {
+        // Đảo ngược mảng để lịch hẹn mới nhất lên đầu
+        setAppointments(data.appointments.reverse());
+        console.log(data.appointments);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
+  // Hàm hủy lịch hẹn
+  const cancelAppointment = async (appointmentId) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/user/cancel-appointment",
+        { appointmentId },
+        { headers: { token } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        getUserAppointments(); // Load lại danh sách sau khi hủy
+        getDoctorsData(); // Cập nhật lại slot trống cho bác sĩ
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
+  // Gọi API khi component được mount hoặc token thay đổi
+  useEffect(() => {
+    if (token) {
+      getUserAppointments();
+    }
+  }, [token]);
+
   return (
     <div>
       <p className="pb-3 mt-12 font-medium text-zinc-700 border-b">
-        My appointment
+        Lịch hẹn của tôi
       </p>
       <div>
-        {doctors.slice(0, 2).map((item, index) => (
+        {/* Map qua state appointments thay vì doctors */}
+        {appointments.map((item, index) => (
           <div
             className="grid grid-cols-[1fr_2fr] gap-4 sm:flex sm:gap-6 py-2 border-b"
             key={index}
           >
             <div>
+              {/* Truy cập thông tin bác sĩ qua object docData (do backend trả về) */}
               <img
                 className="w-32 bg-indigo-50 rounded-xl"
-                src={item.image}
+                src={item.docData.image}
                 alt=""
               />
             </div>
             <div className="flex-1 text-sm text-zinc-600">
-              <p className="text-neutral-800 font-semibold">{item.name} </p>
-              <p>{item.speciality} </p>
-              <p className="text-zinc-700 font-medium mt-1">Address: </p>
-              <p className="text-xs">{item.address.line1}</p>
-              <p className="text-xs">{item.address.line2}</p>
-              <p>
-                <span className="text-sm text-zinc-700 font-medium mt-1">
+              <p className="text-neutral-800 font-semibold">{item.docData.name}</p>
+              <p>{item.docData.speciality}</p>
+              <p className="text-zinc-700 font-medium mt-1">Address:</p>
+              <p className="text-xs">{item.docData.address.line1}</p>
+              <p className="text-xs">{item.docData.address.line2}</p>
+              <p className="mt-1">
+                <span className="text-sm text-zinc-700 font-medium">
                   Date & Time:
                 </span>{" "}
-                25, July, 2024 | 8:30 PM
+                {/* Hiển thị ngày giờ từ dữ liệu lịch hẹn */}
+                {item.slotDate} | {item.slotTime}
               </p>
             </div>
             <div></div>
             <div className="flex flex-col gap-2 justify-end">
-              <button
-                className="text-sm text-stone-500 text-center sm:min-w-48 border rounded
-              hover:bg-[#5f6fff] hover:text-white transition-all duration-300"
-              >
-                Pay Online
-              </button>
-              <button
-                className="text-sm text-stone-500 text-center sm:min-w-48 border rounded
-              hover:bg-red-600 hover:text-white transition-all duration-300"
-              >
-                Cancel Appointment
-              </button>
+             {/* Logic hiển thị nút theo trạng thái (Đã hủy / Đã thanh toán) */}
+             {!item.cancelled && item.payment && <button className='sm:min-w-48 py-2 border rounded text-stone-500 bg-indigo-50'>Paid</button>}
+             {!item.cancelled && !item.payment && <button className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300'>Pay Online</button>}
+             {item.cancelled && <button className='sm:min-w-48 py-2 border border-red-500 rounded text-red-500'>Appointment cancelled</button>}
+             {!item.cancelled && <button onClick={() => cancelAppointment(item._id)} className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300'>Cancel appointment</button>}
             </div>
           </div>
         ))}

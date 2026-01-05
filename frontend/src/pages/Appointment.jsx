@@ -1,3 +1,4 @@
+
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
@@ -15,13 +16,12 @@ const Appointment = () => {
     const [slotTime, setSlotTime] = useState('')
     const navigate = useNavigate()
 
-    // 1. Hàm lấy thông tin chi tiết bác sĩ
     const fetchDocInfo = async () => {
+        // Tìm bác sĩ trong danh sách
         const docInfo = doctors.find(doc => doc._id === docId)
         setDocInfo(docInfo)
     }
 
-    // 2. Hàm tạo các slot giờ (Logic tính toán ngày giờ)
     const getAvailableSlots = async () => {
         setDocSlots([])
         let today = new Date()
@@ -48,11 +48,13 @@ const Appointment = () => {
                 let day = currentDate.getDate()
                 let month = currentDate.getMonth() + 1
                 let year = currentDate.getFullYear()
+                
+                // Format ngày khớp với cách lưu trên Backend
                 const slotDate = day + "_" + month + "_" + year
                 const slotTime = formattedTime
 
-                // Kiểm tra xem giờ này đã bị đặt chưa (Dựa vào dữ liệu từ Backend)
-                const isSlotAvailable = docInfo.slots_booked[slotDate] && docInfo.slots_booked[slotDate].includes(slotTime) ? false : true
+                // --- FIX 1: Kiểm tra an toàn cho slots_booked (Tránh crash nếu slots_booked là undefined) ---
+                const isSlotAvailable = docInfo.slots_booked && docInfo.slots_booked[slotDate] && docInfo.slots_booked[slotDate].includes(slotTime) ? false : true
 
                 if (isSlotAvailable) {
                     timeSlots.push({
@@ -67,11 +69,16 @@ const Appointment = () => {
         }
     }
 
-    // 3. Hàm Đặt lịch (GỌI API XUỐNG BACKEND)
     const bookAppointment = async () => {
         if (!token) {
             toast.warn('Vui lòng đăng nhập để đặt lịch!')
             return navigate('/login')
+        }
+
+        // --- FIX 2: Bắt buộc chọn giờ trước khi bấm nút ---
+        if (!slotTime) {
+            toast.warn('Vui lòng chọn khung giờ bạn muốn khám!')
+            return; 
         }
 
         try {
@@ -81,7 +88,6 @@ const Appointment = () => {
             let year = date.getFullYear()
             const slotDate = day + "_" + month + "_" + year
 
-            // Gọi API: POST /api/user/book-appointment
             const { data } = await axios.post(
                 backendUrl + '/api/user/book-appointment', 
                 { docId, slotDate, slotTime }, 
@@ -90,7 +96,7 @@ const Appointment = () => {
 
             if (data.success) {
                 toast.success(data.message)
-                getDoctorsData() // Load lại data để cập nhật slot đã mất
+                getDoctorsData() // Cập nhật lại dữ liệu để ẩn slot vừa đặt
                 navigate('/my-appointments')
             } else {
                 toast.error(data.message)
@@ -112,9 +118,14 @@ const Appointment = () => {
         }
     }, [docInfo])
 
+    useEffect(() => {
+        // --- FIX 3: Reset slotTime khi đổi ngày để tránh user đặt nhầm giờ của ngày cũ ---
+        setSlotTime('')
+    }, [slotIndex])
+
     return docInfo && (
         <div>
-            {/* ... Phần giao diện hiển thị thông tin bác sĩ (Giữ nguyên) ... */}
+            {/* Header thông tin bác sĩ */}
             <div className='flex flex-col sm:flex-row gap-4'>
                 <div>
                     <img className='bg-primary w-full sm:max-w-72 rounded-lg' src={docInfo.image} alt="" />
@@ -133,30 +144,33 @@ const Appointment = () => {
                 </div>
             </div>
 
-            {/* ... Phần chọn giờ (Booking slots) ... */}
+            {/* Phần chọn Slot */}
             <div className='sm:ml-72 sm:pl-4 mt-4 font-medium text-gray-700'>
                 <p>Booking slots</p>
                 <div className='flex gap-3 items-center w-full overflow-x-scroll mt-4'>
                     {docSlots.length && docSlots.map((item, index) => (
-                        <div onClick={() => setSlotIndex(index)} className={`text-center py-6 min-w-16 rounded-full cursor-pointer ${slotIndex === index ? 'bg-primary text-white' : 'border border-gray-200'}`} key={index}>
-                            <p>{item[0] && item[0].datetime.getDate()}</p>
-                            <p>{item[0] && ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][item[0].datetime.getDay()]}</p>
-                        </div>
+                        // Kiểm tra item[0] tồn tại để tránh lỗi nếu ngày hôm đó hết giờ (rỗng)
+                        item.length > 0 && (
+                            <div onClick={() => setSlotIndex(index)} className={`text-center py-6 min-w-16 rounded-full cursor-pointer ${slotIndex === index ? 'bg-primary text-white' : 'border border-gray-200'}`} key={index}>
+                                <p>{item[0] && item[0].datetime.getDate()}</p>
+                                <p>{item[0] && ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][item[0].datetime.getDay()]}</p>
+                            </div>
+                        )
                     ))}
                 </div>
+                
                 <div className='flex items-center gap-3 w-full overflow-x-scroll mt-4'>
-                    {docSlots.length && docSlots[slotIndex].map((item, index) => (
+                    {/* Chỉ hiển thị giờ nếu ngày đó có slot */}
+                    {docSlots.length > 0 && docSlots[slotIndex] && docSlots[slotIndex].map((item, index) => (
                         <p onClick={() => setSlotTime(item.time)} className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer ${item.time === slotTime ? 'bg-primary text-white' : 'text-gray-400 border border-gray-300'}`} key={index}>
                             {item.time.toLowerCase()}
                         </p>
                     ))}
                 </div>
 
-                {/* NÚT ĐẶT LỊCH: Gọi hàm bookAppointment */}
                 <button onClick={bookAppointment} className='bg-primary text-white text-sm font-light px-14 py-3 rounded-full my-6'>Book an appointment</button>
             </div>
 
-            {/* Danh sách bác sĩ liên quan */}
             <RelatedDoctors docId={docId} speciality={docInfo.speciality} />
         </div>
     )
